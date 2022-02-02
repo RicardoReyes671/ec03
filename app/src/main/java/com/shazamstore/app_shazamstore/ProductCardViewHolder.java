@@ -19,6 +19,7 @@ public class ProductCardViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         productId = itemView.findViewById(R.id.linearLayout_product);
         productImage = itemView.findViewById(R.id.product_image);
+        productImage.setDefaultImageResId(R.drawable.icon_image_broken);
         productTitle = itemView.findViewById(R.id.product_title);
         productPrice = itemView.findViewById(R.id.product_price);
         productAvailability = itemView.findViewById(R.id.product_availability);

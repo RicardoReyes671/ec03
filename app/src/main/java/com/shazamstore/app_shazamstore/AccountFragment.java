@@ -16,15 +16,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 
@@ -41,6 +44,9 @@ public class AccountFragment extends Fragment {
 
     String cameraPermission[];
 
+    FirebaseAuth mAuth;
+    DatabaseReference mDatabase;
+
     @Override
     public void onCreate(Bundle savedInstanceState){ super.onCreate(savedInstanceState); }
 
@@ -48,6 +54,16 @@ public class AccountFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.account_fragment,container,false);
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if(user!=null){
+
+        }
+
         MaterialButton logoutButton = view.findViewById(R.id.button_logout);
         FloatingActionButton editImage = view.findViewById(R.id.button_photo);
         imageProfile = view.findViewById(R.id.image_profile);
@@ -66,12 +82,17 @@ public class AccountFragment extends Fragment {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view,"Sesión cerrada correctamente.",Snackbar.LENGTH_SHORT).show();
-                ((com.shazamstore.app_shazamstore.NavigationHost) getActivity()).navigateTo(new com.shazamstore.app_shazamstore.LoginFragment(),false);
+                FirebaseAuth.getInstance().signOut();
+                Toast.makeText(getContext(), "Sesión cerrada correctamente. Hasta luego.", Toast.LENGTH_LONG).show();
+                goToLogin();
             }
         });
 
         return view;
+    }
+
+    private void goToLogin(){
+        ((com.shazamstore.app_shazamstore.NavigationHost) getActivity()).navigateTo(new com.shazamstore.app_shazamstore.LoginFragment(),false);
     }
 
     public void showImagePicDialog(){

@@ -9,13 +9,17 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity implements com.shazamstore.app_shazamstore.NavigationHost {
 
-    LoginFragment loginFragment = new LoginFragment();
     AccountFragment accountFragment = new AccountFragment();
+    LoginFragment loginFragment = new LoginFragment();
     ProductFragment productFragment = new ProductFragment();
     ShoppingCartFragment shoppingCartFragment = new ShoppingCartFragment();
+
+    FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +33,8 @@ public class MainActivity extends AppCompatActivity implements com.shazamstore.a
                             new ProductFragment()).commit();
         }
 
-
         BottomNavigationView navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
     }
 
     private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -46,7 +48,15 @@ public class MainActivity extends AppCompatActivity implements com.shazamstore.a
                     loadFragment(shoppingCartFragment);
                     return true;
                 case R.id.account:
-                    loadFragment(accountFragment);
+                    mAuth = FirebaseAuth.getInstance();
+                    FirebaseUser user = mAuth.getCurrentUser();
+
+                    if(user!=null){
+                        loadFragment(accountFragment);
+                    }
+                    else {
+                        loadFragment(loginFragment);
+                    }
                     return true;
             }
             return false;

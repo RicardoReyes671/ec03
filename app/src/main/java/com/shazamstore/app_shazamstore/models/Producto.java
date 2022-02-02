@@ -9,6 +9,15 @@ public class Producto {
     private Integer idMarca;
     private String url;
 
+    public Producto(Integer idProducto, String descripcion, Double precio, Integer stock, Integer idCategoria, Integer idMarca) {
+        this.idProducto = idProducto;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.stock = stock;
+        this.idCategoria = idCategoria;
+        this.idMarca = idMarca;
+    }
+
     public Integer getIdProducto() {
         return idProducto;
     }

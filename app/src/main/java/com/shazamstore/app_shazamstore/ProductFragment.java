@@ -1,5 +1,6 @@
 package com.shazamstore.app_shazamstore;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -29,6 +31,8 @@ import retrofit2.internal.EverythingIsNonNull;
 
 public class ProductFragment extends Fragment {
 
+    private DatabaseHelper databaseHelper;
+    private Context context;
     Spinner spinner;
     RecyclerView recyclerView;
     ProductCardRecyclerViewAdapter productCardRecyclerViewAdapter;
@@ -51,7 +55,7 @@ public class ProductFragment extends Fragment {
         spinner = view.findViewById(R.id.spinner_products_categories);
         recyclerView = view.findViewById(R.id.recycler_view);
 
-
+        databaseHelper = new DatabaseHelper(this.getContext());
         loadCategorias();
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -76,7 +80,7 @@ public class ProductFragment extends Fragment {
                             }
                             else{
                                 circularProgressIndicator.setVisibility(View.GONE);
-                                Snackbar.make(view,"Algo ha salido mal...",Snackbar.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), "Algo ha salido mal...", Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -84,12 +88,12 @@ public class ProductFragment extends Fragment {
                         @EverythingIsNonNull
                         public void onFailure(Call<List<Producto>> call, Throwable t) {
                             circularProgressIndicator.setVisibility(View.GONE);
-                            Snackbar.make(view,"Algo ha salido mal...",Snackbar.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Algo ha salido mal...", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
                 else{
-                    productoList.removeAll(productoList);
+                    productoList.clear();
                     loadProductos();
                 }
             }
@@ -99,12 +103,12 @@ public class ProductFragment extends Fragment {
 
             }
         });
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),2,GridLayoutManager.VERTICAL,false));
         if(productoList.isEmpty()){
             loadProductos();
         }
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),2,GridLayoutManager.VERTICAL,false));
+
         productCardRecyclerViewAdapter = new ProductCardRecyclerViewAdapter(productoList);
         recyclerView.setAdapter(productCardRecyclerViewAdapter);
 
@@ -124,13 +128,20 @@ public class ProductFragment extends Fragment {
             public void onResponse(Call<List<Producto>> call, Response<List<Producto>> response) {
                 if(response.isSuccessful() && response.body()!=null) {
                     circularProgressIndicator.setVisibility(View.GONE);
+                    databaseHelper.eliminarProductos();
+                    for(Producto p : response.body()){
+                        databaseHelper.registrarProductoDb(p);
+                    }
                     productoList.addAll(response.body());
                     productCardRecyclerViewAdapter.notifyDataSetChanged();
                     spinner.setEnabled(true);
                 }
                 else{
                     circularProgressIndicator.setVisibility(View.GONE);
-                    Snackbar.make(view,"Algo ha salido mal...",Snackbar.LENGTH_LONG).show();
+                    if(databaseHelper.obtenerProductosDb()!=null){
+                        productoList.addAll(databaseHelper.obtenerProductosDb());
+                    }
+                    Toast.makeText(getContext(), "Algo ha salido mal...", Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -139,7 +150,10 @@ public class ProductFragment extends Fragment {
             @EverythingIsNonNull
             public void onFailure(Call<List<Producto>> call, Throwable t) {
                 circularProgressIndicator.setVisibility(View.GONE);
-                Snackbar.make(view,"Algo ha salido mal...",Snackbar.LENGTH_LONG).show();
+                if(databaseHelper.obtenerProductosDb()!=null){
+                    productoList.addAll(databaseHelper.obtenerProductosDb());
+                }
+                Toast.makeText(getContext(), "Algo ha salido mal...", Toast.LENGTH_LONG).show();
             }
         });
     }
